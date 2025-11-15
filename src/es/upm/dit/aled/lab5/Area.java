@@ -20,15 +20,16 @@ import es.upm.dit.aled.lab5.gui.Position2D;
  * 
  * @author rgarciacarmona
  */
-public class Area {
+public class Area { //es una clase MONITOR
+	//atributos protected pueden ser usados por otras clases, son COMPARTIDOS 
 
 	protected String name;
 	private int time;
 	private Position2D position;
 	private Color color;
-	protected int capacity;
-	protected int numPatients;
-	protected int waiting;
+	protected int capacity; //número máximo pacientes q pueden atenderse
+	protected int numPatients; //pacientes siendo atendidos en este momento 
+	protected int waiting; //pacientes esperando a ser atendidos 
 
 	/**
 	 * Builds a new Area.
@@ -39,9 +40,15 @@ public class Area {
 	 * @param capacity The number of Patients that can be treated at the same time.
 	 * @param position The location of the Area in the GUI.
 	 */
-	public Area(String name, int time, int capacity, Position2D position) {
-		// TODO
+	public Area(String name, int time, int capacity, Position2D position) { // TODO
+		this.name = name;
+		this.time = time;
+		this.position = position;
 		this.color = Color.GRAY; // Default color
+		this.capacity = capacity;
+		this.numPatients = 0; // >=0 && <=capacity
+		this.waiting = 0; // >=0
+		
 	}
 
 	/**
@@ -96,7 +103,23 @@ public class Area {
 	 * 
 	 * @param p The patient that wants to enter.
 	 */
-	// TODO: method enter
+	public synchronized void enter(Patient p){ // TODO: method enter
+		int i = 0; //para saber si ha esperado!!!
+		//esperamos hasta q la sala se vacíe
+		while(this.numPatients == this.capacity) { //no pongo >= xq NO puede ser mayor
+			try {
+				this.waiting++; i++; //hay un paciente más esperando
+				System.out.println("Patient "+p.getNumber()+ ", waiting to enter to "+p.getLocation().getName());
+				wait(); //no hay q poner p.wait() xq la hebra q espera es qn usa el method
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		//hemos conseguido entrar
+		this.numPatients++;
+		if(i>0) {this.waiting--;} //el paciente ha estado esperano!!!
+		System.out.println("Patient "+p.getNumber()+ ", has entered to "+p.getLocation().getName());
+	}
 	
 	/**
 	 * Thread safe method that allows a Patient to exit the area. After the Patient
@@ -104,28 +127,39 @@ public class Area {
 	 * 
 	 * @param p The patient that wants to enter.
 	 */
-	// TODO method exit
+	public synchronized void exit(Patient p){// TODO method exit
+		if(numPatients>0) {this.numPatients--;}
+		notifyAll();
+		System.out.println("Patient "+p.getNumber()+ ", has exited from "+p.getLocation().getName());
+
+	}
 	
 	/**
 	 * Returns the capacity of the Area. This method must be thread safe.
 	 * 
 	 * @return The capacity.
 	 */
-	// TODO: method getCapacity
+	 public synchronized int getCapacity(){ // TODO: method getCapacity
+		 return this.capacity;
+	 }
 	
 	/**
 	 * Returns the current number of Patients being treated at the Area. This method must be thread safe.
 	 * 
 	 * @return The number of Patients being treated.
 	 */
-	// TODO: method getNumPatients
+	 public synchronized int getNumPatients(){ // TODO: method getNumPatients
+		 return this.numPatients;
+	 }
 
 	/**
 	 * Returns the current number of Patients waiting to be treated at the Area. This method must be thread safe.
 	 * 
 	 * @return The number of Patients waiting to be treated.
 	 */
-	// TODO method getWaiting
+	 public synchronized int getWaiting(){ // TODO: method getWaiting
+		return this.waiting;
+	 }
 
 	@Override
 	public int hashCode() {

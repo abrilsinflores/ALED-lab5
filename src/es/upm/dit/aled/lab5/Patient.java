@@ -163,8 +163,20 @@ public class Patient extends Thread {
 	 * Area knows that it must allow access to another Patient that was waiting.
 	 */
 	@Override
-	public void run() {
-		// TODO
+	public void run() {// TODO
+		this.location.enter(this);//intentamos acceder a la ubicacc actual
+		attendedAtLocation(); //atendemos paciente en la ubicación actual
+		this.location.exit(this);//salimos ubi actual
+		while(this.indexProtocol<this.protocol.size()) {//vuelta a atender al paciente hasta finalizar protocolo
+			advanceProtocol(); //avanzamos al siguiente paso del protocolo
+			this.location.enter(this);
+			attendedAtLocation();
+			this.location.exit(this);
+		}
+		//eliminar al paciente de la interfaz 
+		EmergencyRoomGUI.getInstance().removePatient(this); //lo elimino
+		System.out.println("Patient " + this.number + " protocol finished at " + this.location);
+
 	}
 
 }
