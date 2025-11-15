@@ -17,42 +17,31 @@ public class AreaQueue extends Area { // TODO
 	private Queue<Patient> waitQueue; 
 	
 	//Constructor
-	public AreaQueue(String name, int time, int capacity, Position2D position, Queue<Patient> waitQueue) {
-		super();
-		this.waitQueue = waitQueue;
-	}
-	
-	//añadir un paciente AL FINAL d la cola
-	public void add(Patient p) {
-		
-	}
-	
-	//Devuelve el Patient que se encuentra al principio de la cola y lo elimina
-	public Patient remove() {
-		
-		return null;
-	}
-	
-	//Devuelve el Patient que se encuentra al principio de la cola
-	public Patient peek() {
-		
-		return null;
+	public AreaQueue(String name, int time, int capacity, Position2D position) {
+		super(name, time, capacity, position);
+		this.waitQueue = new LinkedList<Patient>();
 	}
 
+	//para entrar numPatients debe ser menor q capacity y Patient el primero de la cola d espera
 	@Override
 	public synchronized void enter(Patient p){
-		//esperamos hasta q la sala se vacíe y q el paciente sea el primero en la cola d espera
-		while((this.numPatients == this.capacity) && ()) { //no pongo >= xq NO puede ser mayor
+		int i = 0; //para saber si ha esperado!!!
+		//esperamos a q haya un hueco en la sala Y seamos los primeros
+		while((this.numPatients == this.capacity)&&(!p.equals(waitQueue.peek()))){ 
 			try {
-				wait(); //no hay q poner p.wait() xq la hebra q espera es qn usa el method
-				this.waiting++; //hay un paciente má sesperando
+				this.waiting++; 
+				i++;
+				this.waitQueue.add(p); //añadimos paciente a la cola d espera
+				wait();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
 		//hemos conseguido entrar
 		this.numPatients++;
-		this.waiting--;
+		this.waitQueue.remove(p); //salimos d la cola
+		if(i>0) {this.waiting--;} 
+		System.out.println("Patient "+p.getNumber()+ ", has entered to "+p.getLocation().getName());
 	}
 
 }

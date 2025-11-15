@@ -128,7 +128,7 @@ public class Area { //es una clase MONITOR
 	 * @param p The patient that wants to enter.
 	 */
 	public synchronized void exit(Patient p){// TODO method exit
-		if(numPatients>0) {this.numPatients--;}
+ 		if(numPatients>0) {this.numPatients--;}
 		notifyAll();
 		System.out.println("Patient "+p.getNumber()+ ", has exited from "+p.getLocation().getName());
 
