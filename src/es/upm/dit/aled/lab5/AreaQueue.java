@@ -12,7 +12,7 @@ import es.upm.dit.aled.lab5.gui.Position2D;
  * 
  * @author rgarciacarmona
  */
-public class AreaQueue extends Area { // TODO
+public class AreaQueue extends Area { 
 	
 	private Queue<Patient> waitQueue; 
 	
@@ -24,24 +24,24 @@ public class AreaQueue extends Area { // TODO
 
 	//para entrar numPatients debe ser menor q capacity y Patient el primero de la cola d espera
 	@Override
-	public synchronized void enter(Patient p){
-		int i = 0; //para saber si ha esperado!!!
-		//esperamos a q haya un hueco en la sala Y seamos los primeros
-		while((this.numPatients == this.capacity)&&(!p.equals(waitQueue.peek()))){ 
-			try {
-				this.waiting++; 
-				i++;
-				this.waitQueue.add(p); //añadimos paciente a la cola d espera
+	public synchronized void enter(Patient patient){
+		System.out.println("Patient " + patient.getNumber() + " trying to enter " + this.getName());
+		this.waiting++;
+		this.waitQueue.add(patient); // Add to the end of the queue
+		try {
+			while (numPatients >= capacity || this.waitQueue.peek() != patient) {
+				System.out.println("Patient " + patient.getNumber() + " waiting for " + this.getName()
+						+ ". Front of the queue?: " + this.waitQueue.peek().equals(patient));
 				wait();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
 			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			Thread.currentThread().interrupt(); // Restore interrupted status
 		}
-		//hemos conseguido entrar
+		this.waitQueue.remove(); // Dequeue from the front
 		this.numPatients++;
-		this.waitQueue.remove(p); //salimos d la cola
-		if(i>0) {this.waiting--;} 
-		System.out.println("Patient "+p.getNumber()+ ", has entered to "+p.getLocation().getName());
+		this.waiting--;
+		System.out.println("Patient " + patient.getNumber() + " has entered " + this.name);
 	}
 
 }
