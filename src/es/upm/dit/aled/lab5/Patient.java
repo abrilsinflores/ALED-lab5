@@ -163,7 +163,7 @@ public class Patient extends Thread {
 	 * Area knows that it must allow access to another Patient that was waiting.
 	 */
 	@Override
-	public void run() {// TODO
+	public void run() {
 		this.location.enter(this);//intentamos acceder a la ubicacc actual
 		attendedAtLocation(); //atendemos paciente en la ubicación actual
 		this.location.exit(this);//salimos ubi actual
