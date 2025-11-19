@@ -103,23 +103,22 @@ public class Area { //es una clase MONITOR
 	 * 
 	 * @param p The patient that wants to enter.
 	 */
-	public synchronized void enter(Patient p){ // TODO: method enter
-		int i = 0; //para saber si ha esperado!!!
-		//esperamos hasta q la sala se vacíe
-		while(this.numPatients == this.capacity) { //no pongo >= xq NO puede ser mayor
-			try {
-				this.waiting++; i++; //hay un paciente más esperando
-				System.out.println("Patient "+p.getNumber()+ ", waiting to enter to "+p.getLocation().getName());
-				wait(); //no hay q poner p.wait() xq la hebra q espera es qn usa el method
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+	public synchronized void enter(Patient p){ 
+		System.out.println("Patient " + p.getNumber() + " trying to enter " + this.name);
+		try {
+			this.waiting++;
+			while (this.numPatients >= this.capacity) {
+				System.out.println("Patient " + p.getNumber() + " waiting for " + this.name);
+				wait();
 			}
+			this.numPatients++;
+			this.waiting--;
+			System.out.println("Patient " + p.getNumber() + " has entered " + this.name);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			Thread.currentThread().interrupt(); // Restore interrupted status
 		}
-		//hemos conseguido entrar
-		this.numPatients++;
-		if(i>0) {this.waiting--;} //el paciente ha estado esperano!!!
-		System.out.println("Patient "+p.getNumber()+ ", has entered to "+p.getLocation().getName());
-	}
+		}
 	
 	/**
 	 * Thread safe method that allows a Patient to exit the area. After the Patient
@@ -127,11 +126,10 @@ public class Area { //es una clase MONITOR
 	 * 
 	 * @param p The patient that wants to enter.
 	 */
-	public synchronized void exit(Patient p){// TODO method exit
- 		if(numPatients>0) {this.numPatients--;}
+	public synchronized void exit(Patient p){
+ 		this.numPatients--;
+ 		System.out.println("Patient " + p.getNumber() + " has exited " + this.name);
 		notifyAll();
-		System.out.println("Patient "+p.getNumber()+ ", has exited from "+p.getLocation().getName());
-
 	}
 	
 	/**
@@ -139,7 +137,7 @@ public class Area { //es una clase MONITOR
 	 * 
 	 * @return The capacity.
 	 */
-	 public synchronized int getCapacity(){ // TODO: method getCapacity
+	 public int getCapacity(){ 
 		 return this.capacity;
 	 }
 	
@@ -148,7 +146,7 @@ public class Area { //es una clase MONITOR
 	 * 
 	 * @return The number of Patients being treated.
 	 */
-	 public synchronized int getNumPatients(){ // TODO: method getNumPatients
+	 public synchronized int getNumPatients(){ 
 		 return this.numPatients;
 	 }
 
@@ -157,7 +155,7 @@ public class Area { //es una clase MONITOR
 	 * 
 	 * @return The number of Patients waiting to be treated.
 	 */
-	 public synchronized int getWaiting(){ // TODO: method getWaiting
+	 public synchronized int getWaiting(){ 
 		return this.waiting;
 	 }
 
